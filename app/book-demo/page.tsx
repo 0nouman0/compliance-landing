@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Calendar, Clock, Video, CheckCircle2, Shield, Sparkles, Users, TrendingUp, ArrowLeft } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
-import { CalendlyWidget } from "@/components/calendar/calendly-widget"
+import { CalcomWidget } from "@/components/calendar/calcom-widget"
 import { BookingForm } from "@/components/calendar/booking-form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function BookDemoPage() {
-  const [bookingMethod, setBookingMethod] = useState<'calendly' | 'form'>('calendly')
+  const [bookingMethod, setBookingMethod] = useState<'calcom' | 'form'>('calcom')
 
   const handleEventScheduled = (event: any) => {
     console.log('Event scheduled:', event)
@@ -141,14 +141,14 @@ export default function BookDemoPage() {
           {/* Right side - Booking Options */}
           <div className="lg:sticky lg:top-24 lg:self-start">
             <div className="overflow-hidden rounded-2xl border border-border bg-card/50 shadow-xl backdrop-blur-sm">
-              <Tabs value={bookingMethod} onValueChange={(value) => setBookingMethod(value as 'calendly' | 'form')} className="w-full">
+              <Tabs value={bookingMethod} onValueChange={(value) => setBookingMethod(value as 'calcom' | 'form')} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 m-4 mb-0">
-                  <TabsTrigger value="calendly">Quick Book</TabsTrigger>
+                  <TabsTrigger value="calcom">Quick Book</TabsTrigger>
                   <TabsTrigger value="form">Custom Request</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="calendly" className="p-4 pt-2">
-                  <CalendlyWidget
+                <TabsContent value="calcom" className="p-4 pt-2">
+                  <CalcomWidget
                     height={650}
                     onEventScheduled={handleEventScheduled}
                     className="rounded-lg overflow-hidden"

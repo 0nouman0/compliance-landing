@@ -22,13 +22,13 @@ export interface BookingRequest {
   timezone: string
 }
 
-// Calendly API utilities
-export class CalendlyAPI {
+// Cal.com API utilities
+export class CalcomAPI {
   private apiToken: string
-  private baseUrl = 'https://api.calendly.com'
+  private baseUrl = 'https://api.cal.com/v1'
 
   constructor() {
-    this.apiToken = calendarConfig.calendly.apiToken || ''
+    this.apiToken = calendarConfig.calcom.apiToken || ''
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
@@ -42,52 +42,63 @@ export class CalendlyAPI {
     })
 
     if (!response.ok) {
-      throw new Error(`Calendly API error: ${response.statusText}`)
+      throw new Error(`Cal.com API error: ${response.statusText}`)
     }
 
     return response.json()
   }
 
   // Get user information
-  async getUser() {
-    return this.makeRequest('/users/me')
+  async getMe() {
+    return this.makeRequest('/me')
   }
 
-  // Get scheduled events
-  async getScheduledEvents(params: {
-    user?: string
-    organization?: string
-    count?: number
-    pageToken?: string
-    sort?: 'start_time:asc' | 'start_time:desc'
-    status?: 'active' | 'canceled'
-    minStartTime?: string
-    maxStartTime?: string
+  // Get bookings
+  async getBookings(params: {
+    status?: 'upcoming' | 'recurring' | 'past' | 'cancelled'
+    take?: number
+    skip?: number
   } = {}) {
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
       if (value) searchParams.append(key, value.toString())
     })
 
-    return this.makeRequest(`/scheduled_events?${searchParams.toString()}`)
+    return this.makeRequest(`/bookings?${searchParams.toString()}`)
   }
 
-  // Get event details
-  async getEvent(eventUuid: string) {
-    return this.makeRequest(`/scheduled_events/${eventUuid}`)
+  // Get booking details
+  async getBooking(bookingId: number) {
+    return this.makeRequest(`/bookings/${bookingId}`)
   }
 
-  // Cancel an event
-  async cancelEvent(eventUuid: string, reason?: string) {
-    return this.makeRequest(`/scheduled_events/${eventUuid}/cancellation`, {
-      method: 'POST',
+  // Cancel a booking
+  async cancelBooking(bookingId: number, reason?: string) {
+    return this.makeRequest(`/bookings/${bookingId}/cancel`, {
+      method: 'DELETE',
       body: JSON.stringify({ reason }),
     })
   }
 
-  // Get event invitees
-  async getEventInvitees(eventUuid: string) {
-    return this.makeRequest(`/scheduled_events/${eventUuid}/invitees`)
+  // Get event types
+  async getEventTypes() {
+    return this.makeRequest('/event-types')
+  }
+
+  // Create a booking
+  async createBooking(data: {
+    eventTypeId: number
+    start: string
+    end: string
+    responses: Record<string, any>
+    timeZone: string
+    language: string
+    metadata?: Record<string, any>
+  }) {
+    return this.makeRequest('/bookings', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
   }
 }
 
@@ -254,12 +265,12 @@ export class MicrosoftCalendarAPI {
 
 // Unified calendar service
 export class CalendarService {
-  private calendlyAPI: CalendlyAPI
+  private calcomAPI: CalcomAPI
   private googleAPI: GoogleCalendarAPI
   private microsoftAPI: MicrosoftCalendarAPI
 
   constructor() {
-    this.calendlyAPI = new CalendlyAPI()
+    this.calcomAPI = new CalcomAPI()
     this.googleAPI = new GoogleCalendarAPI()
     this.microsoftAPI = new MicrosoftCalendarAPI()
   }
@@ -269,28 +280,27 @@ export class CalendarService {
     const events: CalendarEvent[] = []
 
     try {
-      // Get Calendly events
-      const calendlyEvents = await this.calendlyAPI.getScheduledEvents({
-        status: 'active',
-        minStartTime: new Date().toISOString(),
-        sort: 'start_time:asc',
+      // Get Cal.com events
+      const calcomBookings = await this.calcomAPI.getBookings({
+        status: 'upcoming',
+        take: 50,
       })
 
-      // Transform Calendly events to unified format
-      if (calendlyEvents.collection) {
-        events.push(...calendlyEvents.collection.map((event: any) => ({
-          id: event.uri,
-          title: event.name,
-          description: event.event_type.description_plain,
-          startTime: event.start_time,
-          endTime: event.end_time,
-          attendees: [], // Would need to fetch invitees separately
-          meetingUrl: event.location?.join_url,
-          status: 'scheduled' as const,
+      // Transform Cal.com events to unified format
+      if (calcomBookings.bookings) {
+        events.push(...calcomBookings.bookings.map((booking: any) => ({
+          id: booking.id.toString(),
+          title: booking.title || booking.eventType?.title || 'Meeting',
+          description: booking.description || booking.eventType?.description,
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          attendees: booking.attendees?.map((a: any) => a.email) || [],
+          meetingUrl: booking.location?.type === 'integrations:zoom' ? booking.location.link : undefined,
+          status: booking.status === 'ACCEPTED' ? 'scheduled' as const : 'cancelled' as const,
         })))
       }
     } catch (error) {
-      console.error('Error fetching Calendly events:', error)
+      console.error('Error fetching Cal.com events:', error)
     }
 
     return events

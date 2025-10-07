@@ -4,13 +4,12 @@ import { CalendarService } from '@/lib/calendar-api'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const source = searchParams.get('source') // 'calendly', 'google', 'microsoft', or 'all'
+    const source = searchParams.get('source') // 'calcom', 'google', 'microsoft', or 'all'
     const limit = parseInt(searchParams.get('limit') || '10')
     
     const calendarService = new CalendarService()
     
-    // For now, we'll just return Calendly events
-    // You can extend this to include other calendar sources
+    // Get events from Cal.com and other sources
     const events = await calendarService.getAllUpcomingEvents()
     
     return NextResponse.json({

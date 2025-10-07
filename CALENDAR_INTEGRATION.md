@@ -5,9 +5,9 @@ This document provides comprehensive information about the calendar integration 
 ## Overview
 
 The calendar integration system provides multiple ways for users to book demo calls:
-1. **Calendly Widget** - Direct integration with Calendly for instant booking
+1. **Cal.com Widget** - Direct integration with Cal.com for instant booking
 2. **Custom Booking Form** - Alternative form-based booking system
-3. **API Integrations** - Support for Google Calendar, Microsoft Calendar, and Calendly APIs
+3. **API Integrations** - Support for Google Calendar, Microsoft Calendar, and Cal.com APIs
 4. **Webhook Handling** - Real-time event processing and notifications
 
 ## Setup Instructions
@@ -24,10 +24,10 @@ cp env.example .env.local
 Required environment variables:
 
 ```bash
-# Calendly Integration (Required)
-NEXT_PUBLIC_CALENDLY_URL=https://calendly.com/your-username/demo-call
-CALENDLY_API_TOKEN=your_calendly_api_token_here
-CALENDLY_WEBHOOK_SECRET=your_webhook_secret_here
+# Cal.com Integration (Required)
+NEXT_PUBLIC_CAL_COM_URL=https://cal.com/mohammed.-nouman-w81wsr/30min
+CAL_COM_API_TOKEN=your_cal_com_api_token_here
+CAL_COM_WEBHOOK_SECRET=your_webhook_secret_here
 
 # Optional: Google Calendar API
 GOOGLE_CALENDAR_CLIENT_ID=your_google_client_id

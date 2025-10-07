@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,8 +25,16 @@ export function BookingForm({ onBookingComplete, className = '' }: BookingFormPr
     phone: '',
     message: '',
     preferredTime: '',
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timezone: 'UTC',
   })
+
+  // Set timezone on client side to prevent hydration mismatch
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    }))
+  }, [])
   const { toast } = useToast()
 
   const handleInputChange = (field: keyof BookingRequest, value: string) => {

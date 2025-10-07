@@ -1,8 +1,8 @@
 export const calendarConfig = {
-  calendly: {
-    url: process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com/your-username/demo-call',
-    apiToken: process.env.CALENDLY_API_TOKEN,
-    webhookSecret: process.env.CALENDLY_WEBHOOK_SECRET,
+  calcom: {
+    url: process.env.NEXT_PUBLIC_CAL_COM_URL || 'https://cal.com/mohammed.-nouman-w81wsr/30min',
+    apiToken: process.env.CAL_COM_API_TOKEN,
+    webhookSecret: process.env.CAL_COM_WEBHOOK_SECRET,
   },
   google: {
     clientId: process.env.GOOGLE_CALENDAR_CLIENT_ID,
@@ -20,7 +20,7 @@ export const calendarConfig = {
   }
 }
 
-export const calendlyWidgetConfig = {
+export const calcomWidgetConfig = {
   hideGdprBanner: true,
   primaryColor: '9333ea', // Purple theme
   backgroundColor: '1a1a1a', // Dark theme
